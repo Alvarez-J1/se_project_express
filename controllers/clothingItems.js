@@ -6,15 +6,14 @@ const {
   notFound,
 } = require("../utils/errors");
 
-const getClothingItems = (req, res) => {
-  return item
+const getClothingItems = (req, res) =>
+  item
     .find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
       console.error(err);
       return res.status(internalServerError).send({ message: err.message });
     });
-};
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -39,7 +38,7 @@ const deleteItem = (req, res) => {
       if (!deletedItem) {
         return res.status(notFound).send({ message: "Item not found" });
       }
-      res.send({ message: "Item deleted successfully" });
+      return res.send({ message: "Item deleted successfully" });
     })
     .catch((err) => {
       if (err.name === "CastError") {
@@ -50,8 +49,8 @@ const deleteItem = (req, res) => {
     });
 };
 
-const likeItem = (req, res) => {
-  return item
+const likeItem = (req, res) =>
+  item
     .findByIdAndUpdate(
       req.params.itemId,
 
@@ -72,10 +71,9 @@ const likeItem = (req, res) => {
       }
       return res.status(internalServerError).send({ message: err.message });
     });
-};
 
-const dislikeItem = (req, res) => {
-  return item
+const dislikeItem = (req, res) =>
+  item
     .findByIdAndUpdate(
       req.params.itemId,
       { $pull: { likes: req.user._id } },
@@ -93,7 +91,6 @@ const dislikeItem = (req, res) => {
       }
       return res.status(internalServerError).send({ message: err.message });
     });
-};
 
 module.exports = {
   getClothingItems,

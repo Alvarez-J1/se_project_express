@@ -6,15 +6,13 @@ const {
   notFound,
 } = require("../utils/errors");
 
-const getUsers = (req, res) => {
-  return user
+const getUsers = (req, res) => user
     .find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
       return res.status(internalServerError).send({ message: err.message });
     });
-};
 
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
