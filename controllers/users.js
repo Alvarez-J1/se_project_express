@@ -1,11 +1,13 @@
 const user = require("../models/user");
+
 const {
   badRequest,
   internalServerError,
   notFound,
 } = require("../utils/errors");
+
 const getUsers = (req, res) => {
-  user
+  return user
     .find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
@@ -16,9 +18,9 @@ const getUsers = (req, res) => {
 
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
-  user
+  return user
     .create({ name, avatar })
-    .then((user) => res.status(201).send(user))
+    .then((createdUser) => res.status(201).send(createdUser))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
@@ -30,15 +32,16 @@ const createUser = (req, res) => {
 
 const getUser = (req, res) => {
   const { userId } = req.params;
-  user
+  return user
     .findById(userId)
     .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((foundUser) => res.status(200).send(foundUser))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: err.message });
-      } else if (err.name === "CastError") {
+      }
+      if (err.name === "CastError") {
         return res.status(badRequest).send({ message: err.message });
       }
       return res.status(internalServerError).send({ message: err.message });

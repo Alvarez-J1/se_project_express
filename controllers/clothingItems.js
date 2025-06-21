@@ -1,5 +1,5 @@
 const item = require("../models/clothingItem");
-const user = require("../models/user");
+
 const {
   badRequest,
   internalServerError,
@@ -7,7 +7,7 @@ const {
 } = require("../utils/errors");
 
 const getClothingItems = (req, res) => {
-  item
+  return item
     .find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
@@ -19,9 +19,9 @@ const getClothingItems = (req, res) => {
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
-  item
+  return item
     .create({ name, weather, imageUrl, owner })
-    .then((item) => res.status(201).send(item))
+    .then((createdItem) => res.status(201).send(createdItem))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
@@ -33,7 +33,7 @@ const createItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  item
+  return item
     .findByIdAndDelete(itemId)
     .then((deletedItem) => {
       if (!deletedItem) {
@@ -51,7 +51,7 @@ const deleteItem = (req, res) => {
 };
 
 const likeItem = (req, res) => {
-  item
+  return item
     .findByIdAndUpdate(
       req.params.itemId,
 
@@ -61,12 +61,13 @@ const likeItem = (req, res) => {
       { new: true }
     )
     .orFail()
-    .then((item) => res.status(200).send(item))
+    .then((updatedItem) => res.status(200).send(updatedItem))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: err.message });
-      } else if (err.name === "CastError") {
+      }
+      if (err.name === "CastError") {
         return res.status(badRequest).send({ message: err.message });
       }
       return res.status(internalServerError).send({ message: err.message });
@@ -74,19 +75,20 @@ const likeItem = (req, res) => {
 };
 
 const dislikeItem = (req, res) => {
-  item
+  return item
     .findByIdAndUpdate(
       req.params.itemId,
       { $pull: { likes: req.user._id } },
       { new: true }
     )
     .orFail()
-    .then((item) => res.status(200).send(item))
+    .then((dislikedItem) => res.status(200).send(dislikedItem))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: err.message });
-      } else if (err.name === "CastError") {
+      }
+      if (err.name === "CastError") {
         return res.status(badRequest).send({ message: err.message });
       }
       return res.status(internalServerError).send({ message: err.message });

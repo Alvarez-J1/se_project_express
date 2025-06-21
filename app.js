@@ -1,7 +1,11 @@
 const express = require("express");
+
 const mongoose = require("mongoose");
+
 const app = express();
+
 const { PORT = 3001 } = process.env;
+
 const mainRouter = require("./routes/index");
 
 mongoose
@@ -20,9 +24,9 @@ app.use((req, res, next) => {
 });
 app.use("/", mainRouter);
 
-app.use((req, res) => {
-  return res.status(404).send({ message: "Requested resource not found" });
-});
+app.use((req, res) =>
+  res.status(404).send({ message: "Requested resource not found" })
+);
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
