@@ -22,7 +22,7 @@ const createUser = (req, res) => {
     .then((createdUser) => {
       const userWithoutPassword = createdUser.toObject(); // convert to plain Object
       delete userWithoutPassword.password; // remove password  field
-      res.status(201).send(userWithoutPassword);
+      return res.status(201).send(userWithoutPassword);
     })
     .catch((err) => {
       console.error("Full error object:", err); // Add this line
@@ -46,9 +46,7 @@ const getCurrentUser = (req, res) => {
   return user
     .findById(_id)
     .orFail()
-    .then((foundUser) => {
-      res.status(200).send(foundUser);
-    })
+    .then((foundUser) => res.status(200).send(foundUser))
     .catch((err) => {
       console.error("Error in getCurrentUser:", err);
       if (err.name === "DocumentNotFoundError") {
@@ -98,9 +96,8 @@ const updateProfile = (req, res) => {
         runValidators: true,
       }
     )
-    .then((updatedUser) => {
-      return res.status(200).send(updatedUser);
-    })
+    .then((updatedUser) => res.status(200).send(updatedUser))
+
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
