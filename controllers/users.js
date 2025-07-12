@@ -98,7 +98,9 @@ const updateProfile = (req, res) => {
         runValidators: true,
       }
     )
-    .then((updatedUser) => res.status(200).send(updatedUser))
+    .then((updatedUser) => {
+      return res.status(200).send(updatedUser);
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
