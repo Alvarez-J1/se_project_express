@@ -1,10 +1,10 @@
-const user = require("../models/user");
-
-const { JWT_SECRET } = require("../utils/config");
-
 const bcrypt = require("bcryptjs");
 
 const jwt = require("jsonwebtoken");
+
+const user = require("../models/user");
+
+const { JWT_SECRET } = require("../utils/config");
 
 const {
   BAD_REQUEST,
@@ -14,24 +14,13 @@ const {
   UNAUTHORIZED,
 } = require("../utils/errors");
 
-// const getUsers = (req, res) =>
-//   user
-//     .find({})
-//     .then((users) => res.status(200).send(users))
-//     .catch((err) => {
-//       console.error(err);
-//       return res
-//         .status(INTERNAL_SERVER_ERROR)
-//         .send({ message: "An error has occured on the server" });
-//     });
-
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
     .hash(password, 10)
     .then((hash) => user.create({ name, avatar, email, password: hash }))
     .then((createdUser) => {
-      const userWithoutPassword = createdUser.toObject(); //convert to plain Object
+      const userWithoutPassword = createdUser.toObject(); // convert to plain Object
       delete userWithoutPassword.password; // remove password  field
       res.status(201).send(userWithoutPassword);
     })
@@ -84,11 +73,11 @@ const login = (req, res) => {
   user
     .findUserByCredentials(email, password)
 
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+    .then((loggedInUser) => {
+      const token = jwt.sign({ _id: loggedInUser._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ token });
+      return res.send({ token });
     })
     .catch((err) => {
       console.error(err);
