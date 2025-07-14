@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const { MONGO_URL } = require("./utils/config");
+const { MONGO_URL } = require("./config");
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/wtwr_db")
+  .connect(MONGO_URL)
   .then(() => {
     console.log("Connected to DB");
   })
