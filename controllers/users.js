@@ -25,9 +25,6 @@ const createUser = (req, res) => {
       return res.status(201).send(userWithoutPassword);
     })
     .catch((err) => {
-      console.error("Full error object:", err); // Add this line
-      console.error("Error name:", err.name); // Add this line
-      console.error("Error code:", err.code); // Add this line
       console.error(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid user data" });
@@ -79,9 +76,14 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+      if (err.message === "Incorrect email or password") {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Incorrect email or password" });
+      }
       return res
-        .status(UNAUTHORIZED)
-        .send({ message: "Invalid email or password" });
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occured on the server" });
     });
 };
 
