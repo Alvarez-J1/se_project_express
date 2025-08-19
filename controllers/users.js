@@ -88,16 +88,16 @@ const login = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  const { name, avatar } = req.body;
+  const update = {};
+  if (typeof req.body.name === "string") update.name = req.body.name.trim();
+  if (typeof req.body.avatar === "string")
+    update.avatar = req.body.avatar.trim();
+
   user
-    .findByIdAndUpdate(
-      req.user._id,
-      { name, avatar },
-      {
-        new: true,
-        runValidators: true,
-      }
-    )
+    .findByIdAndUpdate(req.user._id, update, {
+      new: true,
+      runValidators: true,
+    })
     .then((updatedUser) => res.status(200).send(updatedUser))
 
     .catch((err) => {
