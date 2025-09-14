@@ -6,15 +6,15 @@ const user = require("../models/user");
 
 const { JWT_SECRET } = require("../utils/config");
 
-const {
-  BAD_REQUEST,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-  CONFLICT,
-  UNAUTHORIZED,
-} = require("../utils/errors");
+const BadRequestError = require("../errors/BadRequestError");
 
-const createUser = (req, res) => {
+const NotFoundError = require("../errors/NotFoundError");
+
+const ConflictError = require("../errors/ConflictError");
+
+const UnathorizedError = require("../errors/UnauthorizedError");
+
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
     .hash(password, 10)
@@ -27,43 +27,34 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid user data" });
+        return next(new BadRequestError("Invalid user data"));
       }
       if (err.name === "MongoServerError" && err.code === 11000) {
-        return res.status(CONFLICT).send({ message: "Email already exists" });
+        return next(new ConflictError("Email already exists"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      return next(err);
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
   return user
     .findById(_id)
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError("User not found");
+    })
     .then((foundUser) => res.status(200).send(foundUser))
     .catch((err) => {
-      console.error("Error in getCurrentUser:", err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
-      }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid user data" });
+        return next(new BadRequestError("Invalid user data"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      return next(err);
     });
 };
-
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Email and password are required" });
+    return next(new BadRequestError("Email and password are required"));
   }
   return user
     .findUserByCredentials(email, password)
@@ -75,43 +66,33 @@ const login = (req, res) => {
       return res.send({ token });
     })
     .catch((err) => {
-      console.error(err);
       if (err.message === "Incorrect email or password") {
-        return res
-          .status(UNAUTHORIZED)
-          .send({ message: "Incorrect email or password" });
+        return next(new UnathorizedError("Incorrect email or password"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      return next(err);
     });
 };
-
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const update = {};
   if (typeof req.body.name === "string") update.name = req.body.name.trim();
   if (typeof req.body.avatar === "string")
     update.avatar = req.body.avatar.trim();
 
-  user
+  return user
     .findByIdAndUpdate(req.user._id, update, {
       new: true,
       runValidators: true,
     })
+    .orFail(() => {
+      throw new NotFoundError("User Not Found");
+    })
     .then((updatedUser) => res.status(200).send(updatedUser))
 
     .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "User Not Found" });
-      }
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid User Data" });
+        return next(new BadRequestError("Invalid user data"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+      return next(err);
     });
 };
-
 module.exports = { createUser, login, getCurrentUser, updateProfile };
