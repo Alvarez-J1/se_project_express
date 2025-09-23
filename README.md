@@ -54,3 +54,11 @@ Before committing your code, make sure you edit the file `sprint.txt` in the roo
 ### Link to the back-end repo:
 
 https://github.com/Alvarez-J1/se_project_express
+
+### Link to the front-end repo:
+
+https://github.com/Alvarez-J1/se_project_react
+
+### Deployed project's domain name:
+
+gcp-demoo.jumpingcrab.com
