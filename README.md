@@ -62,3 +62,7 @@ https://github.com/Alvarez-J1/se_project_react
 ### Deployed project's domain name:
 
 gcp-demoo.jumpingcrab.com
+
+### API domain name:
+
+api.gcp-demoo.jumpingcrab.com
