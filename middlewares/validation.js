@@ -76,9 +76,24 @@ const validateAuthentication = celebrate({
   }).unknown(false),
 });
 
-// const ValidateUserAndClothingItemIds = celebrate({
-//   [Segments.BODY: Joi.object({})]
-// })
+const validateUpdateUser = celebrate({
+  [Segments.BODY]: Joi.object().keys({
+    name: Joi.string().min(2).max(30).messages({
+      "string.min": "Name must be at least 2 characters long",
+      "string.max": "Name must be at most 30 characters long",
+    }),
+    avatar: Joi.string()
+      .custom((value, helpers) => {
+        if (!validator.isURL(value)) {
+          return helpers.error("string.uri");
+        }
+        return value;
+      })
+      .messages({
+        "string.uri": "Avatar must be a valid URL",
+      }),
+  }),
+});
 
 module.exports = {
   validateClothingItemBody,
@@ -87,4 +102,5 @@ module.exports = {
   validateURL,
   validateItemIdParam,
   validateUserIdParam,
+  validateUpdateUser,
 };

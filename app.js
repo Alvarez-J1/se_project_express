@@ -8,7 +8,7 @@ const { errors } = require("celebrate");
 
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
-const { NOT_FOUND } = require("./utils/errors");
+const NotFoundError = require("./errors/NotFoundError");
 
 require("./utils/db");
 
@@ -31,15 +31,17 @@ app.get("/crash-test", () => {
   }, 0);
 });
 
+app.get("/", (req, res) => {
+  res.json({ message: "WTWR API is running!" });
+});
+
 app.use("/", mainRouter);
 
-app.use(requestLogger);
-
-app.use((req, res) =>
-  res.status(NOT_FOUND).send({ message: "Requested resource not found" })
-);
-
 app.use(errorLogger);
+
+app.use((req, res, next) => {
+  next(new NotFoundError("Requested resource not found"));
+});
 
 app.use(errors());
 
