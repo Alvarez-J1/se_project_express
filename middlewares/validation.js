@@ -31,6 +31,13 @@ const validateClothingItemBody = celebrate({
       "string.max": 'The maximum length of the "name" field is 30',
       "string.empty": 'The "name" field must be fulled in',
     }),
+    weather: Joi.string()
+      .valid("hot", "warm", "cold")
+      .required()
+      .messages({
+        "any.only": 'The "weather" field must be one of: hot, warm, cold',
+        "any.required": 'The "weather" field is required',
+      }),
     imageUrl: Joi.string().required().custom(validateURL).messages({
       "string.empty": 'The "imageUrl" field must be filled in',
       "string.uri": 'The "imageUrl" field must be a valid url',
