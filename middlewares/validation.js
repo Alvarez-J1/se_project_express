@@ -31,13 +31,10 @@ const validateClothingItemBody = celebrate({
       "string.max": 'The maximum length of the "name" field is 30',
       "string.empty": 'The "name" field must be fulled in',
     }),
-    weather: Joi.string()
-      .valid("hot", "warm", "cold")
-      .required()
-      .messages({
-        "any.only": 'The "weather" field must be one of: hot, warm, cold',
-        "any.required": 'The "weather" field is required',
-      }),
+    weather: Joi.string().valid("hot", "warm", "cold").required().messages({
+      "any.only": 'The "weather" field must be one of: hot, warm, cold',
+      "any.required": 'The "weather" field is required',
+    }),
     imageUrl: Joi.string().required().custom(validateURL).messages({
       "string.empty": 'The "imageUrl" field must be filled in',
       "string.uri": 'The "imageUrl" field must be a valid url',
@@ -84,22 +81,20 @@ const validateAuthentication = celebrate({
 });
 
 const validateUpdateUser = celebrate({
-  [Segments.BODY]: Joi.object().keys({
-    name: Joi.string().min(2).max(30).messages({
-      "string.min": "Name must be at least 2 characters long",
-      "string.max": "Name must be at most 30 characters long",
-    }),
-    avatar: Joi.string()
-      .custom((value, helpers) => {
-        if (!validator.isURL(value)) {
-          return helpers.error("string.uri");
-        }
-        return value;
-      })
-      .messages({
-        "string.uri": "Avatar must be a valid URL",
+  [Segments.BODY]: Joi.object()
+    .keys({
+      name: Joi.string().min(2).max(30).messages({
+        "string.min": "Name must be at least 2 characters long",
+        "string.max": "Name must be at most 30 characters long",
       }),
-  }),
+      avatar: Joi.alternatives()
+        .try(
+          Joi.string().uri({ scheme: ["http", "https"] }), // valid URL
+          Joi.string().valid("") // OR allow empty string
+        )
+        .optional(),
+    })
+    .unknown(false),
 });
 
 module.exports = {
